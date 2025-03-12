@@ -7,6 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -18,7 +20,7 @@ import org.apache.pdfbox.Loader;
 public class UserInputController {
 
     @PostMapping(value = "/scan", consumes = {"multipart/form-data"})
-    public ResponseEntity<String> processUserInput(
+    public ResponseEntity<Map<String, String>> processUserInput(
             @RequestPart("resume") MultipartFile resumeFile,
             @RequestPart("jobDescription") String jobDescription) {
         try {
@@ -26,11 +28,17 @@ public class UserInputController {
             System.out.println("Extracted Resume Text: " + extractedText);
             System.out.println("Received Job Description: " + jobDescription);
 
-            return ResponseEntity.ok("Resume and Job Description received successfully!");
+            // Create a map to hold the extracted text and job description
+            Map<String, String> response = new HashMap<>();
+            response.put("resumeText", extractedText);
+            response.put("jobDescription", jobDescription);
+
+            return ResponseEntity.ok(response);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing PDF file");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
 
     public static String extractPdfText(MultipartFile file) throws IOException {

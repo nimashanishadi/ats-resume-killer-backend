@@ -16,7 +16,7 @@ import java.util.Map;
 public class KeywordExtractionService {
 
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPENAI_API_KEY = "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"; // Store securely
+    private static final String OPENAI_API_KEY = "key"; // Store securely
 
     public JSONObject getKeywordsFromJobDescription(String jobDescription, String extractedText) {
         try {

@@ -1,5 +1,6 @@
 package com.example.atskiller.service;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -14,26 +15,45 @@ import java.util.Map;
 @Service
 public class UserInputService {
 
-    private final KeywordExtractionService keywordExtractionService;  // Injecting the KeywordExtractionService
+    private final KeywordExtractionService keywordExtractionService;
 
-    // Constructor-based injection for KeywordExtractionService
     public UserInputService(KeywordExtractionService keywordExtractionService) {
         this.keywordExtractionService = keywordExtractionService;
     }
 
-    public Map<String, String> processUserInput(MultipartFile resumeFile, String jobDescription) throws IOException {
+    public Map<String, Object> processUserInput(MultipartFile resumeFile, String jobDescription) throws IOException {
         String extractedText = extractPdfText(resumeFile);
         System.out.println("Extracted Resume Text: " + extractedText);
         System.out.println("Received Job Description: " + jobDescription);
 
-        // Call the KeywordExtractionService to get keywords from the job description
-        String keywords = keywordExtractionService.getKeywordsFromJobDescription(jobDescription);
+        // Call the KeywordExtractionService to get structured JSON response
+        JSONObject keywordsJson = keywordExtractionService.getKeywordsFromJobDescription(jobDescription, extractedText);
+
+        // Convert JSONObject to Map<String, Object>
+        Map<String, Object> keywordsMap = jsonToMap(keywordsJson);
 
         // Prepare response data
-        Map<String, String> response = new HashMap<>();
-        response.put("resumeText", extractedText);
-        response.put("jobDescription", jobDescription);
-        response.put("keywords", keywords);
+        Map<String, Object> response = new HashMap<>();
+        response.put("extractedResumeText", extractedText);
+        response.put("scannedJobDescription", jobDescription);
+
+        // ✅ Extracting each field from keywordsMap and adding separately
+        response.put("keywordsjd", keywordsMap.getOrDefault("keywordsjd", ""));
+        response.put("wordcount", keywordsMap.getOrDefault("wordcount", 0));
+        response.put("address", keywordsMap.getOrDefault("address", ""));
+        response.put("noofHardskillsre", keywordsMap.getOrDefault("noofHardskillsre", 0));
+        response.put("softskillsjd", keywordsMap.getOrDefault("softskillsjd", ""));
+        response.put("linkedin", keywordsMap.getOrDefault("linkedin", ""));
+        response.put("matchingjdre", keywordsMap.getOrDefault("matchingjdre", ""));
+        response.put("noofHardskillsjd", keywordsMap.getOrDefault("noofHardskillsjd", 0));
+        response.put("softskillsre", keywordsMap.getOrDefault("softskillsre", ""));
+        response.put("hardskillsjd", keywordsMap.getOrDefault("hardskillsjd", ""));
+        response.put("noofSoftskillsjd", keywordsMap.getOrDefault("noofSoftskillsjd", 0));
+        response.put("phone", keywordsMap.getOrDefault("phone", ""));
+        response.put("hardskillsre", keywordsMap.getOrDefault("hardskillsre", ""));
+        response.put("keywordsre", keywordsMap.getOrDefault("keywordsre", ""));
+        response.put("noofSoftskillsre", keywordsMap.getOrDefault("noofSoftskillsre", 0));
+        response.put("email", keywordsMap.getOrDefault("email", ""));
 
         return response;
     }
@@ -45,5 +65,21 @@ public class UserInputService {
         } catch (IOException e) {
             throw new IOException("Error reading PDF file", e);
         }
+    }
+
+    // Helper method to convert JSONObject to Map<String, Object>
+    private Map<String, Object> jsonToMap(JSONObject jsonObject) {
+        Map<String, Object> map = new HashMap<>();
+        for (String key : jsonObject.keySet()) {
+            Object value = jsonObject.get(key);
+
+            // Convert JSON arrays to lists (if necessary)
+            if (value instanceof org.json.JSONArray) {
+                value = ((org.json.JSONArray) value).toList();
+            }
+
+            map.put(key, value);
+        }
+        return map;
     }
 }

@@ -22,11 +22,11 @@ public class UserInputController {
     }
 
     @PostMapping(value = "/scan", consumes = {"multipart/form-data"})
-    public ResponseEntity<Map<String, String>> processUserInput(
+    public ResponseEntity<Map<String, Object>> processUserInput(
             @RequestPart("resume") MultipartFile resumeFile,
             @RequestPart("jobDescription") String jobDescription) {
         try {
-            Map<String, String> response = userInputService.processUserInput(resumeFile, jobDescription);
+            Map<String, Object> response = userInputService.processUserInput(resumeFile, jobDescription);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

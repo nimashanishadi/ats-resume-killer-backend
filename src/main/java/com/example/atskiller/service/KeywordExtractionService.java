@@ -1,5 +1,7 @@
 package com.example.atskiller.service;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
@@ -7,58 +9,89 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
-import org.json.JSONObject;
 
 import java.util.Map;
 
 @Service
 public class KeywordExtractionService {
 
-    private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";  // Correct API endpoint
-    private static final String OPENAI_API_KEY = "key"; // Use a secure method for storing the key
+    private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+    private static final String OPENAI_API_KEY = "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"; // Store securely
 
-    public String getKeywordsFromJobDescription(String jobDescription) {
+    public JSONObject getKeywordsFromJobDescription(String jobDescription, String extractedText) {
         try {
             RestTemplate restTemplate = new RestTemplate();
 
-            // Prepare OpenAI API request
+            // Prepare headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("Authorization", "Bearer " + OPENAI_API_KEY);
 
-            // Create JSON body manually using JSONObject to ensure proper formatting
+            // Construct request body
             JSONObject requestBody = new JSONObject();
-            requestBody.put("model", "gpt-3.5-turbo");
-            requestBody.put("max_tokens", 150);
+            requestBody.put("model", "gpt-4-turbo");
+            requestBody.put("max_tokens", 4000);
 
-            // Construct the messages array inside the request
-            JSONObject message = new JSONObject();
-            message.put("role", "user");
-            message.put("content", "Extract relevant keywords from this job description: " + jobDescription);
+            // Construct messages array
+            JSONArray messages = new JSONArray();
+            JSONObject userMessage = new JSONObject();
+            userMessage.put("role", "user");
+            userMessage.put("content",
+                    "Extract relevant keywords from this job description. " +
+                            "Only job-specific keywords. Use key 'keywordsjd'.\n" +
+                            "Extract soft skills with key 'softskillsjd'.\n" +
+                            "Extract hard skills with key 'hardskillsjd'.\n" +
+                            "Total soft skills count: 'noofSoftskillsjd'.\n" +
+                            "Total hard skills count: 'noofHardskillsjd'.\n" +
+                            "Now extract relevant keywords from this extractedText (Resume). " +
+                            "Use key 'keywordsre'.\n" +
+                            "Extract soft skills from Resume: 'softskillsre'.\n" +
+                            "Extract hard skills from Resume: 'hardskillsre'.\n" +
+                            "Total soft skills count: 'noofSoftskillsre'.\n" +
+                            "Total hard skills count: 'noofHardskillsre'.\n" +
+                            "Find matching keywords from job description & resume: 'matchingjdre'.\n" +
+                            "Extract address if possible, else return 'nodata': 'address'.\n" +
+                            "Extract email: 'email'.\n" +
+                            "Extract LinkedIn URL: 'linkedin'.\n" +
+                            "Extract phone number: 'phone'.\n" +
+                            "Extract word count from Resume: 'wordcount'.\n" +
+                            "Job Description: " + jobDescription + "\n" +
+                            "Resume: " + extractedText);
 
-            requestBody.put("messages", new JSONObject[] { message });
+            messages.put(userMessage);
+            requestBody.put("messages", messages);
 
-            // Convert JSONObject to string
-            String requestBodyStr = requestBody.toString();
-
-            HttpEntity<String> entity = new HttpEntity<>(requestBodyStr, headers);
-
-            // Make the API call
+            // Send request
+            HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
             ResponseEntity<Map> response = restTemplate.exchange(
                     OPENAI_API_URL, HttpMethod.POST, entity, Map.class);
 
-            // Log the OpenAI API response for debugging
-            System.out.println("OpenAI Response: " + response.getBody());
-
-            // Extract and return the keywords from the response
+            // Extract JSON response
             if (response.getBody() != null && response.getBody().containsKey("choices")) {
-                return response.getBody().get("choices").toString();
-            } else {
-                return "No keywords found";
+                Map<String, Object> choice = (Map<String, Object>) ((java.util.List) response.getBody().get("choices")).get(0);
+                Map<String, Object> message = (Map<String, Object>) choice.get("message");
+
+                if (message.containsKey("content")) {
+                    String jsonResponse = (String) message.get("content");
+
+                    // Ensure the response is valid JSON (remove backticks if needed)
+                    jsonResponse = jsonResponse.replaceAll("```json", "").replaceAll("```", "").trim();
+
+                    // Parse JSON response to access structured data
+                    JSONObject jsonObject = new JSONObject(jsonResponse);
+
+                    // Print out the structured JSON object for debugging
+                    System.out.println("Extracted JSON Response:");
+                    System.out.println(jsonObject.toString(4));  // Pretty print with indentation of 4 spaces
+
+                    return jsonObject; // Return the parsed JSON object
+                }
             }
+            return new JSONObject().put("error", "No valid JSON response found");
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error extracting keywords";
+            return new JSONObject().put("error", "Error extracting keywords");
         }
     }
+
 }

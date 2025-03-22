@@ -16,7 +16,7 @@ import java.util.Map;
 public class KeywordExtractionService {
 
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPENAI_API_KEY = "key"; // Store securely
+    private static final String OPENAI_API_KEY = "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"; // Store securely
 
     public JSONObject getKeywordsFromJobDescription(String jobDescription, String extractedText) {
         try {
@@ -37,8 +37,10 @@ public class KeywordExtractionService {
             JSONObject userMessage = new JSONObject();
             userMessage.put("role", "user");
             userMessage.put("content",
-                    "Extract relevant keywords from this job description. " +
-                            "Only job-specific keywords. Use key 'keywordsjd'.\n" +
+                    "Extract folllowing keywords and phrases from this job description and resume as much as you can but meaningful. " +
+                            "Only job related words. Use key 'keywordsjd'." +
+                            "get all the keyword list(soft skills ,hard skills and job specific key words" +
+                            " that have in job description but not in resume.Use key missingKeywords)\n" +
                             "Extract soft skills with key 'softskillsjd'.\n" +
                             "Extract hard skills with key 'hardskillsjd'.\n" +
                             "Total soft skills count: 'noofSoftskillsjd'.\n" +
@@ -49,7 +51,8 @@ public class KeywordExtractionService {
                             "Extract hard skills from Resume: 'hardskillsre'.\n" +
                             "Total soft skills count: 'noofSoftskillsre'.\n" +
                             "Total hard skills count: 'noofHardskillsre'.\n" +
-                            "Find matching keywords from job description & resume: 'matchingjdre'.\n" +
+                            "Find all the matching job specific words from both job description & resume (all skills" +
+                            ",soft skills,hard skills,keywords).dont add if not available that word in job description or resume: 'matchingjdre'.\n" +
                             "Extract address if possible, else return 'nodata': 'address'.\n" +
                             "Extract email: 'email'.\n" +
                             "Extract LinkedIn URL: 'linkedin'.\n" +

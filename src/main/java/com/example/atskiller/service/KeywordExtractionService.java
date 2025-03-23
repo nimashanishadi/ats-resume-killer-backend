@@ -37,7 +37,10 @@ public class KeywordExtractionService {
             JSONObject userMessage = new JSONObject();
             userMessage.put("role", "user");
             userMessage.put("content",
-                    "Extract folllowing keywords and phrases from this job description and resume as much as you can but meaningful. " +
+                    "Extract folllowing keywords and phrases from this job description and resume as much as you can but meaningful." +
+                            "name with key name,if no name then 'nodata' ," +
+                            "structure of the resume. use keyword 'structure' : one of words(good,bad,normal)," +
+                            "" +
                             "Only job related words. Use key 'keywordsjd'." +
                             "get all the keyword list(soft skills ,hard skills and job specific key words" +
                             " that have in job description but not in resume.Use key missingKeywords)\n" +
@@ -47,17 +50,27 @@ public class KeywordExtractionService {
                             "Total hard skills count: 'noofHardskillsjd'.\n" +
                             "Now extract relevant keywords from this extractedText (Resume). " +
                             "Use key 'keywordsre'.\n" +
-                            "Extract soft skills from Resume: 'softskillsre'.\n" +
-                            "Extract hard skills from Resume: 'hardskillsre'.\n" +
-                            "Total soft skills count: 'noofSoftskillsre'.\n" +
-                            "Total hard skills count: 'noofHardskillsre'.\n" +
+                            "Extract matching soft skills from Resume to job description: 'softskillsre'.\n" +
+                            "Extract matching hard skills from Resume to job description: 'hardskillsre'.\n" +
+                            "Total matching soft skills count from Resume to job description: 'noofSoftskillsre'.\n" +
+                            "Total matching hard skills count from Resume to job description: 'noofHardskillsre'.\n" +
                             "Find all the matching job specific words from both job description & resume (all skills" +
                             ",soft skills,hard skills,keywords).dont add if not available that word in job description or resume: 'matchingjdre'.\n" +
                             "Extract address if possible, else return 'nodata': 'address'.\n" +
-                            "Extract email: 'email'.\n" +
-                            "Extract LinkedIn URL: 'linkedin'.\n" +
-                            "Extract phone number: 'phone'.\n" +
-                            "Extract word count from Resume: 'wordcount'.\n" +
+                            "Extract email: 'email' if no data then 'nodata'.\n" +
+                            "Extract LinkedIn URL: 'linkedin' if no data then 'nodata'.\n" +
+                            "Extract phone number: 'phone' if no data then 'nodata'.\n" +
+                            "Extract word count from Resume: 'wordcount'" +
+                            "" +
+                            "match and give overall keyword matching score .use key overallScore\n" +
+                            "\n" +
+                            "score should be out of 100%\n" +
+                            "5% for structure of the resume\n" +
+                            "50% for keyword matching. look strictly\n" +
+                            "25% experience matching. look strictly\n" +
+                            "5% education matching\n" +
+                            "10% for better to have qualifications.look strictly " +
+                            ".\n" +
                             "Job Description: " + jobDescription + "\n" +
                             "Resume: " + extractedText);
 

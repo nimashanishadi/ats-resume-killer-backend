@@ -40,6 +40,9 @@ public class UserInputService {
         // ✅ Extracting each field from keywordsMap and adding separately
         response.put("keywordsjd", keywordsMap.getOrDefault("keywordsjd", ""));
         response.put("missingKeywords", keywordsMap.getOrDefault("missingKeywords", ""));
+        response.put("name", keywordsMap.getOrDefault("name", ""));
+        response.put("structure", keywordsMap.getOrDefault("structure", ""));
+        response.put("overallScore", keywordsMap.getOrDefault("overallScore", ""));
         response.put("wordcount", keywordsMap.getOrDefault("wordcount", 0));
         response.put("address", keywordsMap.getOrDefault("address", ""));
         response.put("noofHardskillsre", keywordsMap.getOrDefault("noofHardskillsre", 0));

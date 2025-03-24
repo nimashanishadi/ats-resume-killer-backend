@@ -2,18 +2,20 @@ package com.example.atskiller.controller;
 
 import com.example.atskiller.model.Employee;
 import com.example.atskiller.service.EmployeeService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/employees")
-@RequiredArgsConstructor
 public class EmployeeController {
 
 
     private final EmployeeService service;
+
+    public EmployeeController(EmployeeService service) {
+        this.service = service;
+    }
 
 
     @GetMapping

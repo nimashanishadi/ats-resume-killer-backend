@@ -2,16 +2,18 @@ package com.example.atskiller.service;
 
 import com.example.atskiller.model.Employee;
 import com.example.atskiller.repository.EmployeeRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class EmployeeService {
 
     private final EmployeeRepository repository;
+
+    public EmployeeService(EmployeeRepository repository) {
+        this.repository = repository;
+    }
 
     public List<Employee> getAllEmployees() {
         return repository.findAll();

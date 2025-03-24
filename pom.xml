@@ -81,6 +81,12 @@
 <!--			<version>4.5.13</version> &lt;!&ndash; or a compatible version &ndash;&gt;-->
 <!--		</dependency>-->
 
+		<!-- WebFlux Library -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
 
 		<!-- JSON Processing Library -->
 		<dependency>

@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -22,14 +24,13 @@ public class UserInputController {
     }
 
     @PostMapping(value = "/scan", consumes = {"multipart/form-data"})
-    public ResponseEntity<Map<String, Object>> processUserInput(
+    public Mono<ResponseEntity<Map<String, Object>>> processUserInput(
             @RequestPart("resume") MultipartFile resumeFile,
-            @RequestPart("jobDescription") String jobDescription) {
-        try {
-            Map<String, Object> response = userInputService.processUserInput(resumeFile, jobDescription);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+            @RequestPart("jobDescription") String jobDescription) throws IOException {
+
+        // Call the service method that returns Mono<Map<String, Object>>
+        return userInputService.processUserInput(resumeFile, jobDescription)
+                .map(ResponseEntity::ok) // Wrap in ResponseEntity with status 200 OK
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null))); // Handle errors gracefully
     }
 }

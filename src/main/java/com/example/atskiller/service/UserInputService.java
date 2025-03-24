@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.Loader;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,45 +22,45 @@ public class UserInputService {
         this.keywordExtractionService = keywordExtractionService;
     }
 
-    public Map<String, Object> processUserInput(MultipartFile resumeFile, String jobDescription) throws IOException {
+    public Mono<Map<String, Object>> processUserInput(MultipartFile resumeFile, String jobDescription) throws IOException {
         String extractedText = extractPdfText(resumeFile);
         System.out.println("Extracted Resume Text: " + extractedText);
         System.out.println("Received Job Description: " + jobDescription);
+        // Call the KeywordExtractionService and return the Mono result
+        return keywordExtractionService.getKeywordsFromJobDescription(jobDescription, extractedText)
+                .map(keywordsJson -> {
+                    // Convert the JSONObject to a Map<String, Object>
+                    Map<String, Object> keywordsMap = jsonToMap(keywordsJson);
 
-        // Call the KeywordExtractionService to get structured JSON response
-        JSONObject keywordsJson = keywordExtractionService.getKeywordsFromJobDescription(jobDescription, extractedText);
+                    // Prepare the response data
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("extractedResumeText", extractedText);
+                    response.put("scannedJobDescription", jobDescription);
 
-        // Convert JSONObject to Map<String, Object>
-        Map<String, Object> keywordsMap = jsonToMap(keywordsJson);
+                    // ✅ Extracting each field from keywordsMap and adding separately
+                    response.put("keywordsjd", keywordsMap.getOrDefault("keywordsjd", ""));
+                    response.put("missingKeywords", keywordsMap.getOrDefault("missingKeywords", ""));
+                    response.put("name", keywordsMap.getOrDefault("name", ""));
+                    response.put("structure", keywordsMap.getOrDefault("structure", ""));
+                    response.put("overallScore", keywordsMap.getOrDefault("overallScore", ""));
+                    response.put("wordcount", keywordsMap.getOrDefault("wordcount", 0));
+                    response.put("address", keywordsMap.getOrDefault("address", ""));
+                    response.put("noofHardskillsre", keywordsMap.getOrDefault("noofHardskillsre", 0));
+                    response.put("softskillsjd", keywordsMap.getOrDefault("softskillsjd", ""));
+                    response.put("linkedin", keywordsMap.getOrDefault("linkedin", ""));
+                    response.put("matchingjdre", keywordsMap.getOrDefault("matchingjdre", ""));
+                    response.put("noofHardskillsjd", keywordsMap.getOrDefault("noofHardskillsjd", 0));
+                    response.put("softskillsre", keywordsMap.getOrDefault("softskillsre", ""));
+                    response.put("hardskillsjd", keywordsMap.getOrDefault("hardskillsjd", ""));
+                    response.put("noofSoftskillsjd", keywordsMap.getOrDefault("noofSoftskillsjd", 0));
+                    response.put("phone", keywordsMap.getOrDefault("phone", ""));
+                    response.put("hardskillsre", keywordsMap.getOrDefault("hardskillsre", ""));
+                    response.put("keywordsre", keywordsMap.getOrDefault("keywordsre", ""));
+                    response.put("noofSoftskillsre", keywordsMap.getOrDefault("noofSoftskillsre", 0));
+                    response.put("email", keywordsMap.getOrDefault("email", ""));
 
-        // Prepare response data
-        Map<String, Object> response = new HashMap<>();
-        response.put("extractedResumeText", extractedText);
-        response.put("scannedJobDescription", jobDescription);
-
-        // ✅ Extracting each field from keywordsMap and adding separately
-        response.put("keywordsjd", keywordsMap.getOrDefault("keywordsjd", ""));
-        response.put("missingKeywords", keywordsMap.getOrDefault("missingKeywords", ""));
-        response.put("name", keywordsMap.getOrDefault("name", ""));
-        response.put("structure", keywordsMap.getOrDefault("structure", ""));
-        response.put("overallScore", keywordsMap.getOrDefault("overallScore", ""));
-        response.put("wordcount", keywordsMap.getOrDefault("wordcount", 0));
-        response.put("address", keywordsMap.getOrDefault("address", ""));
-        response.put("noofHardskillsre", keywordsMap.getOrDefault("noofHardskillsre", 0));
-        response.put("softskillsjd", keywordsMap.getOrDefault("softskillsjd", ""));
-        response.put("linkedin", keywordsMap.getOrDefault("linkedin", ""));
-        response.put("matchingjdre", keywordsMap.getOrDefault("matchingjdre", ""));
-        response.put("noofHardskillsjd", keywordsMap.getOrDefault("noofHardskillsjd", 0));
-        response.put("softskillsre", keywordsMap.getOrDefault("softskillsre", ""));
-        response.put("hardskillsjd", keywordsMap.getOrDefault("hardskillsjd", ""));
-        response.put("noofSoftskillsjd", keywordsMap.getOrDefault("noofSoftskillsjd", 0));
-        response.put("phone", keywordsMap.getOrDefault("phone", ""));
-        response.put("hardskillsre", keywordsMap.getOrDefault("hardskillsre", ""));
-        response.put("keywordsre", keywordsMap.getOrDefault("keywordsre", ""));
-        response.put("noofSoftskillsre", keywordsMap.getOrDefault("noofSoftskillsre", 0));
-        response.put("email", keywordsMap.getOrDefault("email", ""));
-
-        return response;
+                    return response;
+                });
     }
 
     private String extractPdfText(MultipartFile file) throws IOException {

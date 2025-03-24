@@ -26,18 +26,14 @@ public class UserInputService {
         String extractedText = extractPdfText(resumeFile);
         System.out.println("Extracted Resume Text: " + extractedText);
         System.out.println("Received Job Description: " + jobDescription);
-        // Call the KeywordExtractionService and return the Mono result
+
         return keywordExtractionService.getKeywordsFromJobDescription(jobDescription, extractedText)
                 .map(keywordsJson -> {
-                    // Convert the JSONObject to a Map<String, Object>
                     Map<String, Object> keywordsMap = jsonToMap(keywordsJson);
 
-                    // Prepare the response data
                     Map<String, Object> response = new HashMap<>();
                     response.put("extractedResumeText", extractedText);
                     response.put("scannedJobDescription", jobDescription);
-
-                    // ✅ Extracting each field from keywordsMap and adding separately
                     response.put("keywordsjd", keywordsMap.getOrDefault("keywordsjd", ""));
                     response.put("missingKeywords", keywordsMap.getOrDefault("missingKeywords", ""));
                     response.put("name", keywordsMap.getOrDefault("name", ""));
@@ -72,17 +68,13 @@ public class UserInputService {
         }
     }
 
-    // Helper method to convert JSONObject to Map<String, Object>
     private Map<String, Object> jsonToMap(JSONObject jsonObject) {
         Map<String, Object> map = new HashMap<>();
         for (String key : jsonObject.keySet()) {
             Object value = jsonObject.get(key);
-
-            // Convert JSON arrays to lists (if necessary)
             if (value instanceof org.json.JSONArray) {
                 value = ((org.json.JSONArray) value).toList();
             }
-
             map.put(key, value);
         }
         return map;

@@ -18,7 +18,7 @@ import java.util.Map;
 public class KeywordExtractionService {
 
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPENAI_API_KEY = "KEY"; // Store securely
+    private static final String OPENAI_API_KEY = "key"; // Store securely
 
     private final WebClient webClient = WebClient.builder()
             .baseUrl(OPENAI_API_URL)

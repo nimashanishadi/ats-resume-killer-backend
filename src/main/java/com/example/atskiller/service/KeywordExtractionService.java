@@ -109,9 +109,29 @@ public class KeywordExtractionService {
                 // Ensure the response is valid JSON (remove backticks if needed)
                 jsonResponse = jsonResponse.replaceAll("```json", "").replaceAll("```", "").trim();
 
-                // Validate and parse JSON response
                 try {
-                    return new JSONObject(jsonResponse);
+                    JSONObject jsonObject = new JSONObject(jsonResponse);
+
+                    // Ensure `hardskillsjd` is an array, convert if necessary
+                    if (jsonObject.has("hardskillsjd")) {
+                        Object hardskillsjdObj = jsonObject.get("hardskillsjd");
+
+                        if (hardskillsjdObj instanceof String) {
+                            // If it's a string, try to parse it into an array
+                            try {
+                                JSONArray hardskillsArray = new JSONArray((String) hardskillsjdObj);
+                                jsonObject.put("hardskillsjd", hardskillsArray);
+                            } catch (Exception e) {
+                                System.err.println("Invalid hardskillsjd format: " + hardskillsjdObj);
+                                jsonObject.put("hardskillsjd", new JSONArray()); // Default to empty array
+                            }
+                        } else if (!(hardskillsjdObj instanceof JSONArray)) {
+                            // If it's not an array, replace it with an empty array
+                            jsonObject.put("hardskillsjd", new JSONArray());
+                        }
+                    }
+
+                    return jsonObject;
                 } catch (Exception e) {
                     System.err.println("Invalid JSON response: " + jsonResponse);
                     return new JSONObject().put("error", "Invalid JSON format received");
@@ -120,5 +140,6 @@ public class KeywordExtractionService {
         }
         return new JSONObject().put("error", "No valid JSON response found");
     }
+
 
 }
